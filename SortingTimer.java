@@ -1,6 +1,3 @@
-// "C:\Program Files\Java\jdk1.8.0_261\bin\Javac.exe" SortingTimer.java
-// "C:\Program Files\Java\jdk1.8.0_261\bin\Java.exe" SortingTimer
-
 /**
  * Sorting Algorithm Timer
  *
@@ -9,6 +6,7 @@
  */
 
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class SortingTimer{
@@ -26,7 +24,7 @@ public class SortingTimer{
 		Timer(createRandomArray(1000), 1000);
 		Timer(createRandomArray(10000), 10000);
 		Timer(createRandomArray(100000), 100000);
-		Timer(createRandomArray(200000), 200000);
+		Timer(createRandomArray(1000000), 1000000);
 		System.out.printf("%s%n%n%s%n%s%n%s%n%n", line,
 						"Press \"Enter\" : to continue",
 						"  or enter the size of array then press \"Enter\"",
@@ -90,13 +88,13 @@ public class SortingTimer{
 						break;
 				case 2: MergeSort(arr, 0, arr.length - 1);
 						break;
-				case 3: // heap
+				case 3: HeapSort(arr);
 						break;
-				case 4: // quick
+				case 4: QuickSort(arr, 0, arr.length - 1, false);
 						break;
-				case 5: // quick 2
+				case 5: QuickSort(arr, 0, arr.length - 1, true);
 						break;
-				case 6: // radix
+				case 6: RadixSort(arr, arr.length - 1);
 						break;
 			}
 			long nanoEnd = System.nanoTime(); 
@@ -203,5 +201,97 @@ public class SortingTimer{
             MergeSort(arr, m + 1, r);
 			merge(arr, l, m, r);
 		}
+	}
+	
+	public void HeapSort(int arr[]) {
+		int n = arr.length;
+		for (int i = n / 2 - 1; i >= 0; i--)
+			heapify(arr, n, i);
+		for (int i=n-1; i>0; i--) {
+			int temp = arr[0];
+			arr[0] = arr[i];
+			arr[i] = temp;
+			heapify(arr, i, 0); 
+		} 
+	}
+	
+	void heapify(int arr[], int n, int i) {
+		int largest = i;
+		int l = 2*i + 1;
+		int r = 2*i + 2;
+		
+		if (l < n && arr[l] > arr[largest])
+			largest = l; 
+		if (r < n && arr[r] > arr[largest])
+			largest = r;
+		if (largest != i) {
+			int swap = arr[i];
+			arr[i] = arr[largest];
+			arr[largest] = swap;
+			heapify(arr, n, largest);
+		}
+	}
+	
+	int partition(int arr[], int low, int high, boolean type2) {
+		int pivot;
+		if (type2) {
+			pivot = arr[randomBetween(low,high)];
+		}
+		else {
+			pivot = arr[high]; 
+		}
+		int i = (low-1);
+		for (int j=low; j<high; j++) {
+			if (arr[j] < pivot) {
+				i++;
+				int temp = arr[i];
+				arr[i] = arr[j];
+				arr[j] = temp;
+			}
+		}
+		int temp = arr[i+1];
+		arr[i+1] = arr[high];
+		arr[high] = temp;
+		return i+1;
+	}
+	
+	void QuickSort(int arr[], int low, int high, boolean type) {
+		if (low < high) { 
+			int pi = partition(arr, low, high, type);
+			QuickSort(arr, low, pi-1, type);
+			QuickSort(arr, pi+1, high, type);
+		}
+	}
+	
+	static int getMax(int arr[], int n) {
+		int mx = arr[0];
+		for (int i = 1; i < n; i++)
+			if (arr[i] > mx)
+				mx = arr[i];
+		return mx;
+	}
+	
+	static void countSort(int arr[], int n, int exp) {
+		int output[] = new int[n];
+		int i;
+		int count[] = new int[10];
+		Arrays.fill(count, 0);
+		
+		for (i = 0; i < n; i++)
+			count[(arr[i] / exp) % 10]++;
+		for (i = 1; i < 10; i++)
+			count[i] += count[i - 1];
+		for (i = n - 1; i >= 0; i--) {
+			output[count[(arr[i] / exp) % 10] - 1] = arr[i];
+			count[(arr[i] / exp) % 10]--;
+		}
+		for (i = 0; i < n; i++)
+			arr[i] = output[i];
+	} 
+	
+	static void RadixSort(int arr[], int n) {
+		int m = getMax(arr, n);
+		for (int exp = 1; m / exp > 0; exp *= 10)
+			countSort(arr, n, exp);
 	}
 }
